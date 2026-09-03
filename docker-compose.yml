@@ -4,7 +4,14 @@ services:
     container_name: buildplay-mongo
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      # Host side is 27417, not the default 27017 -- lots of dev machines
+      # already have some other MongoDB (a native install, a different
+      # project's container, MongoDB Compass's bundled server, ...) sitting
+      # on the default port. If npm run seed connects to THAT one instead of
+      # this container, its data has nothing to do with this project ("db
+      # already exists with different case" is the telltale sign). Using an
+      # uncommon port means this container can never collide with it.
+      - "27417:27017"
     volumes:
       # A Docker-managed named volume rather than a host folder bind-mount.
       # A bind mount under ./data/mongo works fine in most places, but if the
