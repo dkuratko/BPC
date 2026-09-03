@@ -6,5 +6,15 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./data/mongo:/data/db
+      # A Docker-managed named volume rather than a host folder bind-mount.
+      # A bind mount under ./data/mongo works fine in most places, but if the
+      # project sits inside Desktop/Documents/Downloads on macOS, Docker
+      # Desktop needs an extra per-folder permission grant to create files
+      # there (System Settings > Privacy & Security > Files and Folders) --
+      # a named volume lives inside Docker's own storage instead, so it never
+      # runs into that regardless of where the project is checked out.
+      - buildplay_mongo_data:/data/db
     command: ["--quiet"]
+
+volumes:
+  buildplay_mongo_data:
