@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.env
+.env.local
+.DS_Store
+/data/mongo
+uploads/
+coverage/
+
+# Electron desktop build. build/ holds tracked icon source files
+# (build/icon.ico, .icns, .png) for electron-builder -- only its output is ignored.
+/release/

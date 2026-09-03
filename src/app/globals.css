@@ -1,0 +1,458 @@
+/* ==========================================================================
+   Build Play Contracting - Estimating System
+   A Windows 98 / 2000 interface, built from scratch rather than pulled from a
+   theme library, so the controls behave like real controls: beveled edges that
+   invert when pressed, sunken inputs, grouped fieldsets, a status bar that
+   actually says something.
+
+   The palette is the classic 3D one:
+     face        #c0c0c0   window and button face
+     highlight   #ffffff   top/left light edge
+     light       #dfdfdf   inner top/left edge
+     shadow      #808080   inner bottom/right edge
+     dark        #000000   outer bottom/right edge
+   ========================================================================== */
+
+:root {
+  --face: #c0c0c0;
+  --face-light: #dfdfdf;
+  --highlight: #ffffff;
+  --shadow: #808080;
+  --dark-edge: #000000;
+  --desktop: #3a6ea5;
+  --title-active-a: #000080;
+  --title-active-b: #1084d0;
+  --title-inactive-a: #808080;
+  --title-inactive-b: #b5b5b5;
+  --text: #000000;
+  --text-disabled: #808080;
+  --field-bg: #ffffff;
+  --selection: #000080;
+  --selection-text: #ffffff;
+  --money-good: #006400;
+  --money-bad: #a00000;
+  --warn-bg: #ffffe1;
+  --font: "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Geneva, Verdana, sans-serif;
+  --font-mono: "Lucida Console", "Courier New", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--desktop);
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--text);
+  -webkit-font-smoothing: none;
+}
+/* Reserves space for the Electron title bar (see ElectronTitleBar.tsx), which
+   sits above .desktop/.login-screen as an ordinary sibling in the document.
+   Stays 0px — a no-op, identical to before this existed — in a plain browser
+   tab; ElectronTitleBar sets it to its own height on mount only when running
+   inside the desktop app. A min-height, not a fixed height, so a page taller
+   than the viewport still grows and scrolls exactly as it always has. */
+:root { --electron-titlebar-height: 0px; }
+
+/* Old UIs did not animate. Keep it honest. */
+* { transition: none !important; }
+
+a { color: #0000cc; }
+a:visited { color: #551a8b; }
+
+::selection { background: var(--selection); color: var(--selection-text); }
+
+/* --- bevels ------------------------------------------------------------- */
+.raised {
+  border: 1px solid;
+  border-color: var(--highlight) var(--dark-edge) var(--dark-edge) var(--highlight);
+  box-shadow: inset 1px 1px 0 var(--face-light), inset -1px -1px 0 var(--shadow);
+  background: var(--face);
+}
+.sunken {
+  border: 1px solid;
+  border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+  box-shadow: inset 1px 1px 0 var(--dark-edge), inset -1px -1px 0 var(--face-light);
+  background: var(--field-bg);
+}
+.groove {
+  border: 1px solid;
+  border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+}
+
+/* --- window ------------------------------------------------------------- */
+.window {
+  background: var(--face);
+  border: 1px solid;
+  border-color: var(--highlight) var(--dark-edge) var(--dark-edge) var(--highlight);
+  box-shadow: inset 1px 1px 0 var(--face-light), inset -1px -1px 0 var(--shadow);
+  padding: 3px;
+  margin-bottom: 8px;
+}
+.title-bar {
+  background: linear-gradient(90deg, var(--title-active-a), var(--title-active-b));
+  color: #fff;
+  font-weight: bold;
+  padding: 3px 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+.title-bar.inactive {
+  background: linear-gradient(90deg, var(--title-inactive-a), var(--title-inactive-b));
+}
+.title-bar .title-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.title-bar .title-buttons { display: flex; gap: 2px; }
+.title-button {
+  width: 18px; height: 16px;
+  background: var(--face);
+  border: 1px solid;
+  border-color: var(--highlight) var(--dark-edge) var(--dark-edge) var(--highlight);
+  box-shadow: inset 1px 1px 0 var(--face-light), inset -1px -1px 0 var(--shadow);
+  color: #000; font-size: 10px; font-weight: bold;
+  display: flex; align-items: center; justify-content: center;
+  cursor: default; padding: 0;
+}
+.window-body { padding: 8px; }
+
+/* --- buttons ------------------------------------------------------------ */
+button, .btn {
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--text);
+  background: var(--face);
+  border: 1px solid;
+  border-color: var(--highlight) var(--dark-edge) var(--dark-edge) var(--highlight);
+  box-shadow: inset 1px 1px 0 var(--face-light), inset -1px -1px 0 var(--shadow);
+  padding: 3px 12px;
+  min-width: 70px;
+  cursor: default;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  line-height: 16px;
+}
+button:active:not(:disabled), .btn:active {
+  border-color: var(--dark-edge) var(--highlight) var(--highlight) var(--dark-edge);
+  box-shadow: inset 1px 1px 0 var(--shadow), inset -1px -1px 0 var(--face-light);
+  padding: 4px 11px 2px 13px;
+}
+button:focus-visible, .btn:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
+button:disabled { color: var(--text-disabled); text-shadow: 1px 1px 0 var(--highlight); }
+button.small, .btn.small { min-width: 0; padding: 1px 6px; font-size: 11px; }
+button.primary { font-weight: bold; }
+button.danger { color: #800000; }
+
+/* --- inputs ------------------------------------------------------------- */
+input[type="text"], input[type="number"], input[type="email"], input[type="password"],
+input[type="date"], select, textarea {
+  font-family: var(--font);
+  font-size: 12px;
+  padding: 2px 3px;
+  background: var(--field-bg);
+  color: var(--text);
+  border: 1px solid;
+  border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+  box-shadow: inset 1px 1px 0 var(--dark-edge), inset -1px -1px 0 var(--face-light);
+  min-width: 0;
+}
+input:disabled, select:disabled, textarea:disabled {
+  background: var(--face); color: var(--text-disabled);
+}
+textarea { font-family: var(--font); resize: vertical; }
+select { padding: 1px 2px; }
+input[type="checkbox"], input[type="radio"] { margin: 0 4px 0 0; vertical-align: -1px; }
+label { user-select: none; }
+
+/* --- fieldset ----------------------------------------------------------- */
+fieldset {
+  border: 1px solid;
+  border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+  padding: 10px 8px 8px;
+  margin: 0 0 10px;
+}
+legend { padding: 0 4px; font-weight: bold; }
+
+/* --- tables ------------------------------------------------------------- */
+.grid-wrap {
+  border: 1px solid;
+  border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+  box-shadow: inset 1px 1px 0 var(--dark-edge), inset -1px -1px 0 var(--face-light);
+  background: var(--field-bg);
+  overflow: auto;
+}
+table.grid { border-collapse: collapse; width: 100%; background: var(--field-bg); }
+table.grid th {
+  background: var(--face);
+  border: 1px solid;
+  border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight);
+  padding: 3px 6px;
+  text-align: left;
+  font-weight: bold;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+table.grid td {
+  padding: 2px 6px;
+  border-bottom: 1px solid #e4e4e4;
+  vertical-align: top;
+}
+table.grid tbody tr:hover td { background: #efefef; }
+table.grid tbody tr.selected td { background: var(--selection); color: var(--selection-text); }
+table.grid tbody tr.selected a { color: #fff; }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mono { font-family: var(--font-mono); }
+
+/* --- tabs --------------------------------------------------------------- */
+.tabs { display: flex; gap: 1px; margin-bottom: -1px; padding-left: 3px; position: relative; z-index: 2; }
+.tab {
+  background: var(--face);
+  border: 1px solid;
+  border-color: var(--highlight) var(--dark-edge) transparent var(--highlight);
+  box-shadow: inset 1px 1px 0 var(--face-light);
+  padding: 3px 10px 4px;
+  cursor: default;
+  min-width: 0;
+  border-radius: 3px 3px 0 0;
+  position: relative;
+}
+.tab.active { font-weight: bold; padding-bottom: 5px; top: -2px; z-index: 3; }
+.tab-body {
+  border: 1px solid;
+  border-color: var(--highlight) var(--dark-edge) var(--dark-edge) var(--highlight);
+  box-shadow: inset 1px 1px 0 var(--face-light), inset -1px -1px 0 var(--shadow);
+  background: var(--face);
+  padding: 10px;
+}
+
+/* --- status bar --------------------------------------------------------- */
+.status-bar { display: flex; gap: 2px; margin-top: 4px; }
+.status-panel {
+  border: 1px solid;
+  border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+  padding: 2px 6px;
+  background: var(--face);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status-panel.tight { flex: 0 0 auto; }
+
+/* --- app chrome --------------------------------------------------------- */
+.desktop { min-height: calc(100vh - var(--electron-titlebar-height)); display: flex; flex-direction: column; }
+.menu-bar {
+  background: var(--face);
+  border-bottom: 1px solid var(--shadow);
+  box-shadow: 0 1px 0 var(--highlight);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px;
+  flex-wrap: wrap;
+}
+.menu-item {
+  padding: 3px 8px;
+  cursor: default;
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid transparent;
+}
+.menu-item:hover { border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight); }
+.menu-item.active {
+  background: var(--selection);
+  color: var(--selection-text);
+  border-color: transparent;
+}
+.menu-spacer { flex: 1; }
+.app-main { flex: 1; padding: 8px; max-width: 1400px; width: 100%; margin: 0 auto; }
+.taskbar {
+  background: var(--face);
+  border-top: 1px solid var(--highlight);
+  box-shadow: 0 -1px 0 var(--shadow);
+  padding: 3px 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.taskbar .clock {
+  border: 1px solid;
+  border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+  padding: 2px 8px;
+}
+
+/* --- layout helpers ----------------------------------------------------- */
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.row.tight { gap: 4px; }
+.col { display: flex; flex-direction: column; gap: 6px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.split-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.split-wide { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+@media (max-width: 900px) {
+  .split, .split-3, .split-wide { grid-template-columns: 1fr; }
+}
+.field { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+.field label { font-size: 11px; }
+.field .hint { font-size: 11px; color: #404040; }
+.inline-field { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.inline-field label { min-width: 150px; text-align: right; font-size: 11px; }
+.spacer { flex: 1; }
+.right { text-align: right; }
+.center { text-align: center; }
+.muted { color: #404040; }
+.small-text { font-size: 11px; }
+.nowrap { white-space: nowrap; }
+.stack > * + * { margin-top: 8px; }
+
+/* --- notices ------------------------------------------------------------ */
+.notice {
+  border: 1px solid var(--dark-edge);
+  background: var(--warn-bg);
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+.notice.error { background: #ffe4e1; }
+.notice.info { background: #e4f0ff; }
+.notice.ok { background: #e4ffe4; }
+.notice-icon { font-weight: bold; margin-right: 4px; }
+
+/* --- money -------------------------------------------------------------- */
+.money { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.money.big { font-size: 20px; font-weight: bold; }
+.money.pos { color: var(--money-good); }
+.money.neg { color: var(--money-bad); }
+
+.price-tier {
+  border: 1px solid;
+  border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+  padding: 8px;
+  text-align: center;
+  background: var(--face);
+  cursor: default;
+}
+.price-tier.selected {
+  border-color: var(--dark-edge);
+  background: #ffffcc;
+  box-shadow: inset 0 0 0 1px var(--dark-edge);
+}
+.price-tier .tier-name { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+.price-tier .tier-price { font-size: 18px; font-weight: bold; font-variant-numeric: tabular-nums; }
+.price-tier .tier-margin { font-size: 11px; color: #404040; }
+
+/* --- progress ----------------------------------------------------------- */
+.progress {
+  border: 1px solid;
+  border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+  background: var(--field-bg);
+  height: 16px;
+  padding: 1px;
+  display: flex;
+  gap: 1px;
+  overflow: hidden;
+}
+.progress .chunk { background: var(--title-active-a); width: 6px; flex: 0 0 6px; }
+
+/* --- explain popover ---------------------------------------------------- */
+.explain {
+  background: var(--warn-bg);
+  border: 1px solid var(--dark-edge);
+  padding: 6px 8px;
+  font-size: 11px;
+  margin-top: 2px;
+}
+.explain dl { margin: 4px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 1px 10px; }
+.explain dt { color: #404040; }
+.explain dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+/* --- electron desktop chrome --------------------------------------------
+   Only ever rendered inside the packaged Electron app (see
+   ElectronTitleBar.tsx) -- a plain browser tab never sees this. The window is
+   frameless, so this bar is the only way to move, minimize, maximize or close
+   it. Kept visually consistent with the app's per-panel title bars (same
+   blue gradient) but functionally distinct: this one drives a real OS window. */
+.electron-titlebar {
+  background: linear-gradient(90deg, var(--title-active-a), var(--title-active-b));
+  color: #fff;
+  height: 28px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 8px;
+  font-weight: bold;
+  font-size: 12px;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+.electron-titlebar-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.electron-titlebar-buttons {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+.electron-titlebar-btn {
+  width: 46px;
+  height: 100%;
+  min-width: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  border-radius: 0;
+}
+.electron-titlebar-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.electron-titlebar-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0;
+}
+.electron-titlebar-close:hover {
+  background: #e81123;
+}
+.electron-titlebar-close:active {
+  background: #f1707a;
+}
+
+/* --- login -------------------------------------------------------------- */
+.login-screen {
+  min-height: calc(100vh - var(--electron-titlebar-height));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.login-window { width: 100%; max-width: 380px; }
+
+/* --- print: the customer-facing estimate -------------------------------- */
+@media print {
+  body { background: #fff; font-family: Georgia, "Times New Roman", serif; font-size: 11pt; }
+  .no-print, .menu-bar, .taskbar, .status-bar { display: none !important; }
+  .window, .tab-body { border: none; box-shadow: none; background: #fff; padding: 0; }
+  .title-bar { display: none; }
+  .grid-wrap { border: none; box-shadow: none; overflow: visible; }
+  table.grid th { background: #eee; border: 1px solid #999; }
+  table.grid td { border-bottom: 1px solid #ddd; }
+  .print-only { display: block !important; }
+  a { color: #000; text-decoration: none; }
+}
+.print-only { display: none; }

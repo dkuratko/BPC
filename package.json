@@ -1,0 +1,85 @@
+{
+  "name": "buildplay-estimating",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Build Play Contracting — playground installation estimating system",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "seed": "tsx seed/seed.ts",
+    "seed:reset": "tsx seed/seed.ts --reset",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "setup": "bash scripts/setup.sh",
+    "electron:dev": "electron .",
+    "electron:build": "next build && node scripts/prepare-standalone.js && electron-builder",
+    "electron:build:dir": "next build && node scripts/prepare-standalone.js && electron-builder --dir"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.3",
+    "jose": "6.2.10",
+    "mongoose": "8.24.4",
+    "next": "15.5.25",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "dotenv": "17.4.2",
+    "electron": "44.1.1",
+    "electron-builder": "26.15.3",
+    "tsx": "4.23.13",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20.9"
+  },
+  "build": {
+    "appId": "com.buildplaycontracting.estimating",
+    "productName": "Build Play Estimating",
+    "copyright": "Build Play Contracting",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json",
+      "!electron/node_modules/.package-lock.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "app",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "asar": true,
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.business"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Office"
+    }
+  }
+}

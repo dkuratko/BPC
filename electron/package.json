@@ -1,0 +1,9 @@
+{
+  "name": "buildplay-estimating-electron-main",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Dependencies for electron/main.js only. Kept separate from the root package.json (the Next.js app) so packaging the desktop app does not also bundle a second copy of next/react/mongoose -- the built .next/standalone server already carries its own.",
+  "dependencies": {
+    "mongodb-memory-server-core": "11.2.0"
+  }
+}
